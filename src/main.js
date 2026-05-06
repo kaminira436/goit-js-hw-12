@@ -1,3 +1,5 @@
+import "./styles.css";
+
 import iziToast from "izitoast";
 import "izitoast/dist/css/iziToast.min.css";
 
@@ -20,6 +22,7 @@ let totalHits = 0;
 
 hideLoadMoreButton();
 
+// 🔍 ПОШУК
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
 
@@ -46,7 +49,17 @@ form.addEventListener("submit", async (event) => {
     totalHits = data.totalHits;
 
     createGallery(data.hits);
-    showLoadMoreButton();
+
+    if (page * 15 < totalHits) {
+      showLoadMoreButton();
+    } else {
+      hideLoadMoreButton();
+
+      iziToast.info({
+        message:
+          "We're sorry, but you've reached the end of search results.",
+      });
+    }
 
   } catch {
     iziToast.error({
@@ -57,9 +70,11 @@ form.addEventListener("submit", async (event) => {
   }
 });
 
-// LOAD MORE
+// 🔄 LOAD MORE
 loadMoreBtn.addEventListener("click", async () => {
   page++;
+
+  hideLoadMoreButton();
   showLoader();
 
   try {
@@ -67,7 +82,6 @@ loadMoreBtn.addEventListener("click", async () => {
 
     createGallery(data.hits);
 
-    // scroll
     const card = document
       .querySelector(".gallery-item")
       .getBoundingClientRect();
@@ -77,8 +91,9 @@ loadMoreBtn.addEventListener("click", async () => {
       behavior: "smooth",
     });
 
-    // кінець
-    if (page * 15 >= totalHits) {
+    if (page * 15 < totalHits) {
+      showLoadMoreButton();
+    } else {
       hideLoadMoreButton();
 
       iziToast.info({
